@@ -42,7 +42,6 @@ return {
           globalstatus = true,
           component_separators = "",
           section_separators = { left = "", right = "" },
-          disabled_filetypes = { statusline = { "NvimTree" } },
         },
         sections = {
           lualine_a = { { "mode", icon = "" } },
@@ -86,29 +85,48 @@ return {
       options = {
         diagnostics = "nvim_lsp",
         show_close_icon = false,
-        offsets = {
-          { filetype = "NvimTree", text = "", separator = true },
-        },
       },
     },
   },
 
-  -- File tree.
+  -- File tree, opened as a floating window (sized like the Telescope pickers).
   {
-    "nvim-tree/nvim-tree.lua",
-    cmd = { "NvimTreeToggle", "NvimTreeFocus", "NvimTreeFindFile" },
-    dependencies = "nvim-tree/nvim-web-devicons",
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    lazy = false, -- neo-tree lazy-loads itself
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-tree/nvim-web-devicons",
+    },
+    ---@module "neo-tree"
+    ---@type neotree.Config
     opts = {
-      filters = { dotfiles = false },
-      disable_netrw = true,
-      hijack_cursor = true,
-      sync_root_with_cwd = true,
-      update_focused_file = { enable = true, update_root = false },
-      view = { width = 30, preserve_window_proportions = true },
-      renderer = {
-        root_folder_label = false,
-        highlight_git = true,
-        indent_markers = { enable = true },
+      popup_border_style = "single",
+      window = {
+        position = "float",
+        popup = {
+          size = { height = "80%", width = "87%" },
+          position = "50%",
+        },
+        mappings = {
+          -- Same as <CR>: expand a folder / open a file. Overrides the global
+          -- <Tab> buffer-cycling map inside the tree.
+          ["<Tab>"] = "open",
+        },
+      },
+      filesystem = {
+        -- Show everything. Nothing is filtered out; dotfiles and gitignored
+        -- entries are only dimmed (git status colors handle the latter).
+        filtered_items = {
+          visible = true,
+          hide_dotfiles = false,
+          hide_gitignored = false,
+          hide_ignored = false,
+          hide_hidden = false,
+        },
+        follow_current_file = { enabled = true },
+        use_libuv_file_watcher = true,
       },
     },
   },

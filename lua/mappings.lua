@@ -132,7 +132,7 @@ map("n", "<leader>fw", telescope "live_grep", { desc = "Live grep" })
 -- Files and projects
 --------------------------------------------------------------------------------
 map("n", "<leader>pf", telescope "git_files", { desc = "Search files in repo" })
-map("n", "<leader>ff", telescope "find_files", { desc = "Find files" })
+map("n", "<leader>ff", "<cmd>Neotree toggle reveal<CR>", { desc = "Toggle file tree" })
 map("n", "<leader>fa", telescope("find_files", { follow = true, no_ignore = true, hidden = true }), {
   desc = "Find all files",
 })
@@ -145,8 +145,7 @@ map({ "n", "x" }, "<leader>fm", function()
 end, { desc = "Format file" })
 
 -- File tree
-map("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file tree" })
-map("n", "<leader>e", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file tree" })
+map("n", "<leader>e", "<cmd>Neotree reveal<CR>", { desc = "Open file tree at current file" })
 
 --------------------------------------------------------------------------------
 -- Buffers

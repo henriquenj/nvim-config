@@ -31,7 +31,7 @@ out the leftovers.
 | LSP        | nvim-lspconfig, Mason, mason-lspconfig, conform (formatting)                                              |
 | Completion | nvim-cmp, LuaSnip, friendly-snippets, nvim-autopairs                                                      |
 | Syntax     | nvim-treesitter                                                                                           |
-| Interface  | lualine, bufferline, nvim-tree, which-key, indent-blankline                                               |
+| Interface  | lualine, bufferline, neo-tree, which-key, indent-blankline                                                |
 | Themes     | everforest (default), gruvbox-material, tokyonight, catppuccin, kanagawa, nightfox, rose-pine, onedarkpro |
 
 Layout:
@@ -107,8 +107,7 @@ back onto the committed lockfile at any time.
 | `<C-e>`            | Move to line end          | Emacs-style End in n/v/i/c modes          |
 | `<C-j>` / `<C-k>`  | Scroll view down/up       | Scroll without moving the cursor          |
 | `<C-h>` / `<C-l>`  | Move to left/right window | Quick window hop                          |
-| `<C-n>`            | Toggle file tree          | Project drawer                            |
-| `<leader>e`        | Focus file tree           | Jump into the project drawer              |
+| `<leader>e`        | Open file tree at file    | Floating neo-tree, `<Esc>` closes it      |
 | `<leader>gs`       | Open Neogit UI            | Leader-based git status entry point       |
 | `<leader>gfl`      | Git log for current file  | File-focused git history from leader menu |
 | `<leader>gt`       | Git status (Telescope)    | Changed files picker                      |
@@ -119,7 +118,7 @@ back onto the committed lockfile at any time.
 | `<Tab>` / `<S-Tab>`| Next/previous buffer      | Cycle the buffer tabs                     |
 | `<leader>fs`       | Save file                 | File save under `SPC f`-style group       |
 | `<leader>fr`       | Recent files              | Reopen recent files from file group       |
-| `<leader>ff`       | Find files                | File picker from the current directory    |
+| `<leader>ff`       | Toggle file tree          | Floating neo-tree at the current file     |
 | `<leader>fm`       | Format buffer             | conform, LSP fallback                     |
 | `<leader>fh`       | Help tags                 | Search the manual                         |
 | `<leader>qq`       | Quit Neovim (confirm)     | Prompt before quitting unsaved buffers    |
