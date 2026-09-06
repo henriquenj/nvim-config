@@ -17,7 +17,9 @@ git clone https://github.com/henriquenj/nvim-config ~/.config/nvim && nvim
 ```
 
 The first start clones lazy.nvim and installs every plugin at the commit
-recorded in `lazy-lock.json`.
+recorded in `lazy-lock.json`. A machine that previously ran the NvChad
+version of this config should follow [MIGRATION.md](MIGRATION.md) to clear
+out the leftovers.
 
 ## What is in the box
 
