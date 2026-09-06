@@ -9,6 +9,7 @@ return {
     },
     opts = {
       integrations = { telescope = true, diffview = true },
+      sections = { recent = { hidden = true } },
     },
   },
 
