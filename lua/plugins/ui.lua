@@ -3,26 +3,78 @@ return {
   { "nvim-tree/nvim-web-devicons", lazy = true },
 
   -- Statusline (single global line, like laststatus=3 in options.lua).
+  -- Layout, icons and slanted separators follow NvChad's "default" statusline:
+  -- mode | file | git ... diagnostics | lsp | cwd | cursor.
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
-    opts = {
-      options = {
-        theme = "auto",
-        globalstatus = true,
-        component_separators = { left = "", right = "" },
-        section_separators = { left = "", right = "" },
-        disabled_filetypes = { statusline = { "NvimTree" } },
-      },
-      sections = {
-        lualine_a = { "mode" },
-        lualine_b = { "branch", "diff", "diagnostics" },
-        lualine_c = { { "filename", path = 1 } },
-        lualine_x = { "lsp_status", "filetype" },
-        lualine_y = { "progress" },
-        lualine_z = { "location" },
-      },
-    },
+    dependencies = "nvim-tree/nvim-web-devicons",
+    opts = function()
+      local function lsp_clients()
+        local names = {}
+        for _, client in ipairs(vim.lsp.get_clients { bufnr = 0 }) do
+          names[#names + 1] = client.name
+        end
+        if #names == 0 then
+          return ""
+        end
+        return vim.o.columns > 100 and ("LSP ~ " .. table.concat(names, ", ")) or "LSP"
+      end
+
+      local function cwd()
+        local path = vim.uv.cwd() or ""
+        return path:match "([^/\\]+)[/\\]*$" or path
+      end
+
+      local function cursor()
+        return string.format("%d/%d", vim.fn.line ".", vim.fn.virtcol ".")
+      end
+
+      -- Reuse the counts gitsigns already keeps instead of running git again.
+      local function gitsigns_diff()
+        local status = vim.b.gitsigns_status_dict
+        return status and { added = status.added, modified = status.changed, removed = status.removed }
+      end
+
+      return {
+        options = {
+          theme = "auto",
+          globalstatus = true,
+          component_separators = "",
+          section_separators = { left = "", right = "" },
+          disabled_filetypes = { statusline = { "NvimTree" } },
+        },
+        sections = {
+          lualine_a = { { "mode", icon = "" } },
+          lualine_b = {
+            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+            { "filename", file_status = false, path = 0, padding = { left = 0, right = 1 } },
+          },
+          lualine_c = {
+            { "branch", icon = "" },
+            { "diff", source = gitsigns_diff, symbols = { added = " ", modified = " ", removed = " " } },
+          },
+          lualine_x = {
+            {
+              "diagnostics",
+              sections = { "error", "warn", "hint", "info" },
+              symbols = { error = " ", warn = " ", hint = "󰛩 ", info = "󰋼 " },
+            },
+            { lsp_clients, icon = "" },
+          },
+          lualine_y = {
+            {
+              cwd,
+              icon = "󰉋",
+              cond = function()
+                return vim.o.columns > 85
+              end,
+            },
+          },
+          lualine_z = { { cursor, icon = "" } },
+        },
+      }
+    end,
   },
 
   -- Buffer tabs along the top.
