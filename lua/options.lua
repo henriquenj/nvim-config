@@ -12,6 +12,7 @@ o.termguicolors = true
 o.clipboard = "unnamedplus"
 o.cursorline = true
 o.cursorlineopt = "number"
+o.wrap = false -- keep long lines on one screen line
 
 -- Indenting
 o.expandtab = true
