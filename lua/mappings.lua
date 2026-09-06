@@ -156,6 +156,9 @@ map("n", "<leader>fb", telescope "buffers", { desc = "Find buffers" })
 map("n", "<leader>bd", "<cmd>confirm bdelete<CR>", { desc = "Close current buffer" })
 map("n", "<leader>x", "<cmd>confirm bdelete<CR>", { desc = "Close current buffer" })
 map("n", "<leader>bn", "<cmd>enew<CR>", { desc = "New buffer" })
+-- SPC TAB alternates between the current and last buffer (Spacemacs / Alt-Tab
+-- style); TAB cycles through the buffer tabs in order.
+map("n", "<leader><Tab>", "<cmd>b #<CR>", { desc = "Switch to last buffer" })
 map("n", "<Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Next buffer" })
 map("n", "<S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
 

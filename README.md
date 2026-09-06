@@ -115,6 +115,7 @@ back onto the committed lockfile at any time.
 | `<leader>bb`       | List/switch buffers       | Buffer switching from a leader prefix     |
 | `<leader>bd`       | Delete current buffer     | Quick buffer close from buffer group      |
 | `<leader>bn`       | New empty buffer          | Scratch space                             |
+| `<leader><Tab>`    | Switch to last buffer     | Alternate between two buffers (`SPC TAB`) |
 | `<Tab>` / `<S-Tab>`| Next/previous buffer      | Cycle the buffer tabs                     |
 | `<leader>fs`       | Save file                 | File save under `SPC f`-style group       |
 | `<leader>fr`       | Recent files              | Reopen recent files from file group       |
