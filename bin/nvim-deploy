@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Move every plugin onto the revision recorded in lazy-lock.json.
+# Use this on work machines instead of `:Lazy update`/`:Lazy sync`, which
+# chase upstream and rewrite the lockfile.
+set -euo pipefail
+
+CONFIG="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if [ -n "$(git -C "$CONFIG" status --porcelain -- lazy-lock.json)" ]; then
+    echo "!! $CONFIG/lazy-lock.json has uncommitted changes; refusing to deploy" >&2
+    git -C "$CONFIG" --no-pager diff -- lazy-lock.json >&2
+    exit 1
+fi
+
+# `install` clones anything missing at the locked commit, `restore` checks out
+# the locked commit for everything already present (and re-runs build steps).
+nvim --headless "+Lazy! install" "+Lazy! restore" +qa
+echo "Plugins restored to $CONFIG/lazy-lock.json"
