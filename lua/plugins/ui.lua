@@ -85,6 +85,9 @@ return {
       options = {
         diagnostics = "nvim_lsp",
         show_close_icon = false,
+        -- A single buffer needs no tab bar; bufferline drops `showtabline` to 0
+        -- until a second one is open.
+        always_show_bufferline = false,
       },
     },
   },
