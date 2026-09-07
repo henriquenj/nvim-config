@@ -11,9 +11,17 @@ git -C ~/.config/nvim pull
 ~/.config/nvim/bin/nvim-deploy
 ```
 
-The first start clones the new plugins at the commits in `lazy-lock.json`.
-Plugins shared with the old config (Telescope, Neogit, cmp, Mason, ...) stay
-on the commit they already had, so nothing has to be re-downloaded for them.
+Do not start plain `nvim` between the pull and the deploy. lazy.nvim installs
+missing plugins on any startup and rewrites `lazy-lock.json` afterwards from
+the commits it finds on disk, so a single `nvim` (or `:checkhealth`) run on a
+half-migrated machine replaces the pins with whatever the old config had. The
+deploy script protects the file across its own runs; a manual start does not.
+
+`nvim-deploy` clones the plugins the old config did not have at the commits in
+`lazy-lock.json`, and moves the shared ones (Telescope, Neogit, cmp, Mason,
+...) back down to those commits too, since NvChad tracked them at newer
+revisions. Nothing is re-downloaded from scratch for the shared ones, they are
+only checked out.
 
 ## 2. Remove the orphaned plugins
 

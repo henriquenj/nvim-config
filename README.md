@@ -75,13 +75,21 @@ git -C ~/.config/nvim pull
 ~/.config/nvim/bin/nvim-deploy
 ```
 
-Installs anything missing at the locked commit and checks out the locked
-commit for everything else (re-running build steps). Refuses to run if
-`lazy-lock.json` has uncommitted changes, so a stray local update cannot be
-mistaken for the pin.
+Installs anything missing at the locked commit, then checks out the locked
+commit for everything else (re-running the build steps of what it moved).
+Refuses to run if `lazy-lock.json` has uncommitted changes, so a stray local
+update cannot be mistaken for the pin.
+
+Every lazy.nvim command ends by rewriting `lazy-lock.json` from the commits
+that happen to be on disk, so the script keeps the pinned file aside and puts
+it back after each run. What lazy writes is then the check: a run that leaves
+the lockfile byte-identical is proof that every plugin sits on its pin, and the
+script fails loudly with a diff when it does not.
 
 Do not run `:Lazy update` or `:Lazy sync` on these machines. Both chase
-upstream and rewrite the lockfile.
+upstream and rewrite the lockfile. Starting plain `nvim` while plugins are
+still missing does the same, because lazy.nvim installs them on startup, so
+deploy first on a machine that is behind.
 
 ### Promote new revisions (test machine)
 

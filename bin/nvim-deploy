@@ -2,17 +2,48 @@
 # Move every plugin onto the revision recorded in lazy-lock.json.
 # Use this on work machines instead of `:Lazy update`/`:Lazy sync`, which
 # chase upstream and rewrite the lockfile.
+#
+# Every lazy.nvim operation ends by rewriting lazy-lock.json from the commits
+# that are on disk at that moment (`lazy/manage/lock.lua`), and `Lazy install`
+# skips plugins that are already installed instead of checking them out. On a
+# machine that carries older copies of shared plugins, that combination silently
+# replaces the pins with the stale local commits. So the pinned file is kept in
+# a temporary copy and put back after each nvim run, and the file lazy writes is
+# used as the verification: identical to the pin means every plugin landed on it.
 set -euo pipefail
 
 CONFIG="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LOCK="$CONFIG/lazy-lock.json"
 
 if [ -n "$(git -C "$CONFIG" status --porcelain -- lazy-lock.json)" ]; then
-    echo "!! $CONFIG/lazy-lock.json has uncommitted changes; refusing to deploy" >&2
+    echo "!! $LOCK has uncommitted changes; refusing to deploy" >&2
     git -C "$CONFIG" --no-pager diff -- lazy-lock.json >&2
     exit 1
 fi
 
-# `install` clones anything missing at the locked commit, `restore` checks out
-# the locked commit for everything already present (and re-runs build steps).
-nvim --headless "+Lazy! install" "+Lazy! restore" +qa
-echo "Plugins restored to $CONFIG/lazy-lock.json"
+PINNED="$(mktemp)"
+trap 'cp -f "$PINNED" "$LOCK"; rm -f "$PINNED"' EXIT
+cp "$LOCK" "$PINNED"
+
+# Clone anything missing at the locked commit and run its build step. Plugins
+# that are already installed are left alone by `install`, which is why a second
+# pass is needed below.
+nvim --headless "+Lazy! install" +qa
+cp "$PINNED" "$LOCK"
+
+# With nothing missing, `restore` goes through the `update` pipeline, which does
+# check out the locked commit for installed plugins (and rebuilds the ones it
+# moves). A run that leaves the lockfile untouched proves the tree matches.
+for _ in 1 2 3; do
+    nvim --headless "+Lazy! restore" +qa
+    if cmp -s "$PINNED" "$LOCK"; then
+        echo "Plugins restored to $LOCK"
+        exit 0
+    fi
+    DRIFT="$(diff -u "$PINNED" "$LOCK" || true)"
+    cp "$PINNED" "$LOCK"
+done
+
+echo "!! plugins did not settle on the pinned revisions after 3 passes" >&2
+echo "$DRIFT" >&2
+exit 1

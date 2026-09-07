@@ -6,23 +6,35 @@ vim.g.maplocalleader = ","
 
 require "options"
 
--- Bootstrap lazy.nvim. The clone tracks `stable`; `Lazy restore` then moves it
--- (like every other plugin) onto the commit recorded in lazy-lock.json.
+-- Bootstrap lazy.nvim at the commit recorded in lazy-lock.json. lazy.nvim runs
+-- a few lines below, before it has read any lockfile of its own, so this is the
+-- one plugin that has to be pinned by hand: cloning a branch would execute
+-- whatever its tip happens to hold. `--no-checkout` keeps that tip out of the
+-- working tree entirely. `stable` is the fallback for a config with no lockfile.
 local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
-if not vim.uv.fs_stat(lazypath) then
-  local out = vim.fn.system {
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "--branch=stable",
-    "https://github.com/folke/lazy.nvim.git",
-    lazypath,
-  }
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({ { "Failed to clone lazy.nvim:\n" .. out, "ErrorMsg" } }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
+local lockfile = vim.fn.stdpath "config" .. "/lazy-lock.json"
+
+local function lazy_pin()
+  local f = io.open(lockfile, "r")
+  if not f then
+    return nil
   end
+  local ok, lock = pcall(vim.json.decode, f:read "*a")
+  f:close()
+  return ok and type(lock) == "table" and lock["lazy.nvim"] and lock["lazy.nvim"].commit or nil
+end
+
+if not vim.uv.fs_stat(lazypath) then
+  local function git(...)
+    local out = vim.fn.system { "git", ... }
+    if vim.v.shell_error ~= 0 then
+      vim.api.nvim_echo({ { "Failed to bootstrap lazy.nvim:\n" .. out, "ErrorMsg" } }, true, {})
+      vim.fn.getchar()
+      os.exit(1)
+    end
+  end
+  git("clone", "--filter=blob:none", "--no-checkout", "https://github.com/folke/lazy.nvim.git", lazypath)
+  git("-C", lazypath, "checkout", lazy_pin() or "stable")
 end
 vim.opt.rtp:prepend(lazypath)
 
