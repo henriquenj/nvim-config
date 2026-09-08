@@ -54,3 +54,15 @@ autocmd("ColorScheme", {
 -- init.lua applies the saved theme before requiring this file, so the autocmd
 -- above has already missed the first colorscheme.
 flatten_floats()
+
+-- Markdown is where prose gets written here (prompts, notes, READMEs), so it
+-- starts hard-wrapped instead of waiting for `:ToggleHardWrap`. Buffer-local,
+-- so the command still flips it off for a buffer that wants long lines.
+autocmd("FileType", {
+  group = augroup("markdown_hard_wrap", { clear = true }),
+  pattern = "markdown",
+  callback = function()
+    vim.bo.textwidth = 80
+    vim.opt_local.formatoptions:append "t"
+  end,
+})
