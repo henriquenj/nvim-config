@@ -10,6 +10,29 @@ o.splitkeep = "screen"
 o.termguicolors = true
 
 o.clipboard = "unnamedplus"
+
+-- "unnamedplus" is served by a clipboard provider, and Neovim finds one by
+-- itself wherever there is one: pbcopy on macOS, wl-copy or xsel/xclip under a
+-- display server, win32yank on WSL, tmux's own buffers when $TMUX is set. It
+-- does not fall back to OSC 52 while 'clipboard' is set, because the paste half
+-- of OSC 52 queries the terminal and hangs on the many that never answer, so on
+-- a bare machine (a plain ssh session, say) yanks would reach nothing at all.
+-- Opt into OSC 52 there, where copying is an escape sequence the terminal
+-- forwards to the system clipboard and needs nothing installed, and pasting
+-- reads the last yank back rather than asking the terminal for it. Setting this
+-- has to come before anything calls has("clipboard"), which freezes the choice.
+if not (vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY or vim.env.TMUX) and vim.fn.has "mac" == 0 then
+  local osc52 = require "vim.ui.clipboard.osc52"
+  local function paste()
+    return { vim.split(vim.fn.getreg "", "\n"), vim.fn.getregtype "" }
+  end
+  g.clipboard = {
+    name = "OSC 52",
+    copy = { ["+"] = osc52.copy "+", ["*"] = osc52.copy "*" },
+    paste = { ["+"] = paste, ["*"] = paste },
+  }
+end
+
 o.cursorline = true
 o.cursorlineopt = "number"
 o.wrap = false -- keep long lines on one screen line
