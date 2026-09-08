@@ -46,7 +46,9 @@ return {
         sections = {
           lualine_a = { { "mode", icon = "" } },
           lualine_b = {
-            { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+            -- colored = false so the icon picks up the section highlight and matches
+            -- the filename next to it, the way NvChad's statusline paints it.
+            { "filetype", icon_only = true, colored = false, separator = "", padding = { left = 1, right = 0 } },
             { "filename", file_status = false, path = 0, padding = { left = 0, right = 1 } },
           },
           lualine_c = {
