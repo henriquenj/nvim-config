@@ -1,6 +1,22 @@
 -- Personal Neovim configuration. Plugins are managed by lazy.nvim and pinned
 -- through lazy-lock.json (see README.md for the deploy/promote workflow).
 
+-- Everything below assumes vim.uv (0.10) and vim.lsp.config (0.11). Without
+-- this guard an older Neovim dies partway through with a message about the
+-- missing API rather than about its version, and, headless, still exits 0, so
+-- bin/nvim-deploy reported a successful deploy on a machine where lazy.nvim had
+-- never run.
+if vim.fn.has "nvim-0.11" ~= 1 then
+  local v = vim.version()
+  local msg = ("This configuration requires Neovim 0.11 or newer; this is %d.%d.%d. Nothing was loaded."):format(
+    v.major,
+    v.minor,
+    v.patch
+  )
+  vim.api.nvim_echo({ { msg, "ErrorMsg" } }, true, {})
+  return
+end
+
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 

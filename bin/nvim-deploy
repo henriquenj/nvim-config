@@ -10,6 +10,11 @@
 # replaces the pins with the stale local commits. So the pinned file is kept in
 # a temporary copy and put back after each nvim run, and the file lazy writes is
 # used as the verification: identical to the pin means every plugin landed on it.
+#
+# That verification needs one guard. nvim exits 0 even when init.lua raises, and
+# a config that dies before lazy.nvim runs leaves lazy-lock.json untouched,
+# which is also what a clean pass looks like, so every run has to prove that
+# lazy actually loaded before its silence counts as success.
 set -euo pipefail
 
 CONFIG="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,6 +26,19 @@ if [ -n "$(git -C "$CONFIG" status --porcelain -- lazy-lock.json)" ]; then
     exit 1
 fi
 
+# Run one lazy.nvim command, and fail unless lazy was reached.
+lazy() {
+    local out
+    out="$(nvim --headless "+Lazy! $1" \
+        "+lua io.stdout:write(package.loaded.lazy and '\\nlazy-ran\\n' or '')" +qa 2>&1)" || true
+    printf '%s\n' "$out" | grep -v '^lazy-ran$' || true
+    if [[ "$out" != *lazy-ran* ]]; then
+        echo "!! nvim never got as far as lazy.nvim, so nothing was deployed" >&2
+        echo "!! $(nvim --version | head -1); see the errors above" >&2
+        exit 1
+    fi
+}
+
 PINNED="$(mktemp)"
 trap 'cp -f "$PINNED" "$LOCK"; rm -f "$PINNED"' EXIT
 cp "$LOCK" "$PINNED"
@@ -28,14 +46,14 @@ cp "$LOCK" "$PINNED"
 # Clone anything missing at the locked commit and run its build step. Plugins
 # that are already installed are left alone by `install`, which is why a second
 # pass is needed below.
-nvim --headless "+Lazy! install" +qa
+lazy install
 cp "$PINNED" "$LOCK"
 
 # With nothing missing, `restore` goes through the `update` pipeline, which does
 # check out the locked commit for installed plugins (and rebuilds the ones it
 # moves). A run that leaves the lockfile untouched proves the tree matches.
 for _ in 1 2 3; do
-    nvim --headless "+Lazy! restore" +qa
+    lazy restore
     if cmp -s "$PINNED" "$LOCK"; then
         echo "Plugins restored to $LOCK"
         exit 0

@@ -7,8 +7,22 @@ deploy workflow mirrors the one in my [Doom Emacs
 config](https://github.com/henriquenj/dotdoom): plugins are pinned to a tested
 revision, work machines only ever move onto that pin.
 
-Requires Neovim 0.11 or newer, `git`, `ripgrep`, and a C compiler (for the
-Telescope fzf sorter). Language servers are installed by Mason on first start.
+Requires Neovim 0.11 or newer plus a handful of command-line tools, listed
+under [Requirements](#requirements). Language servers are installed by Mason on
+first start.
+
+## Requirements
+
+lazy.nvim clones the plugins itself and Mason downloads the language servers,
+but neither installs anything below. This is what a new machine has to bring.
+
+| Tool                              | Needed for                                                   | Check                       |
+|-----------------------------------|--------------------------------------------------------------|-----------------------------|
+| Neovim 0.11 or newer              | the config at all (`vim.uv`, `vim.lsp.config`)               | `nvim --version`            |
+| `git`                             | lazy.nvim's clones and checkouts, Neogit, gitsigns, diffview | `git --version`             |
+| ripgrep                           | `<leader>/` and `<leader>*`, Telescope's grep pickers        | `rg --version`              |
+| a C compiler and `make`           | building telescope-fzf-native (`build = "make"`)             | `cc --version`              |
+| a Nerd Font in the terminal       | the icons in the statusline, tabs, file tree, diagnostics    | open `:Lazy`, boxes mean no |
 
 ## Install
 
@@ -84,7 +98,10 @@ Every lazy.nvim command ends by rewriting `lazy-lock.json` from the commits
 that happen to be on disk, so the script keeps the pinned file aside and puts
 it back after each run. What lazy writes is then the check: a run that leaves
 the lockfile byte-identical is proof that every plugin sits on its pin, and the
-script fails loudly with a diff when it does not.
+script fails loudly with a diff when it does not. An untouched lockfile is also
+what a Neovim that never reached lazy.nvim leaves behind (an old Neovim, say,
+since `nvim --headless` exits 0 even when `init.lua` raises), so each run has to
+report that lazy ran before its silence counts as success.
 
 Do not run `:Lazy update` or `:Lazy sync` on these machines. Both chase
 upstream and rewrite the lockfile. Starting plain `nvim` while plugins are
